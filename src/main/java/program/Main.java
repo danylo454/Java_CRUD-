@@ -1,9 +1,8 @@
 package program;
 
 import jdk.jfr.Category;
-import models.Question;
-import models.QuestionItem;
-import models.Role;
+
+import models.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
@@ -14,10 +13,44 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        showUserInfo();
 
-        gameTest();
+
+    }
+    private  static  void showUserInfo(){
+        Session context = HiberSessionUtil.getSessionFactory().openSession();
+        Transaction tx = context.beginTransaction();
+        Query query = context.createQuery("FROM User");
+        List<User> listUser = query.list();
+        for (User u : listUser){
+            System.out.println("Name User: " +u.getFirstName() + " " + u.getLastName());
+            var roles = u.getUserRoles();
+            for (UserRole ur:roles ) {
+                System.out.println("Role: " + ur.getRole().getName());
+            }
 
 
+        }
+
+
+        tx.commit();
+        context.close();
+
+    }
+    private static void addUserRole() {
+        Session context = HiberSessionUtil.getSessionFactory().openSession();
+        Transaction tx = context.beginTransaction();
+        User user = new User();
+        user.setFirstName("Іван"); user.setLastName("Бегемот"); user.setPhone("+73892837843");
+        user.setEmail("ivam@gmail.com"); user.setPassword("123456");
+        context.save(user);
+        Role role = context.get(Role.class, 1);
+        UserRole ur = new UserRole();
+        ur.setUser(user);
+        ur.setRole(role);
+        context.save(ur);
+        tx.commit();
+        context.close();
     }
     private static void gameTest(){
         Scanner in = new Scanner(System.in);
